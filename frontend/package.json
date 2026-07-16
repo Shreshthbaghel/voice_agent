@@ -1,0 +1,26 @@
+{
+  "name": "voice-medicine-assistant-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.91.2",
+    "axios": "^1.13.6",
+    "livekit-client": "^2.9.1",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@vitejs/plugin-react": "^6.0.0",
+    "tailwindcss": "^4.2.2",
+    "vite": "^8.0.0"
+  }
+}
