@@ -221,16 +221,17 @@ async def entrypoint(ctx: JobContext) -> None:
     agent = MedicineAgent(language=language, chat_ctx=chat_ctx)
     await session.start(agent=agent, room=ctx.room)
 
-    # Only greet on a fresh session; keep quiet when continuing prior chat context
-    if not chat_ctx.items:
-        greet = english_session_hint if language == "en" else hindi_session_hint
-        await session.generate_reply(instructions=greet)
+    # Always greet to test audio output
+    greet = english_session_hint if language == "en" else hindi_session_hint
+    await session.generate_reply(instructions=greet)
 
 
 if __name__ == "__main__":
+    import livekit.agents
     cli.run_app(WorkerOptions(
         entrypoint_fnc=entrypoint,
         load_threshold=float('inf'),
         num_idle_processes=0,
-        port=int(os.environ.get("PORT", 8081))
+        port=int(os.environ.get("PORT", 8081)),
+        job_executor_type=livekit.agents.JobExecutorType.THREAD
     ))
