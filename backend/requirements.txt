@@ -20,3 +20,4 @@ bcrypt<4.0.0
 metricai>=0.6.2
 aiohttp>=3.9.0
 multidict>=6.0.0
+livekit-plugins-elevenlabs

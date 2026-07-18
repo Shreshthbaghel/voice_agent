@@ -1,69 +1,66 @@
 # Voice Medicine Assistant
 
-Web-based voice agent for medicine information — built on the same architecture as `decision_os` and `roast_my_pitchdeck`.
+A full-stack, web-based voice agent for interactive medicine information, built with LiveKit, FastAPI, and React (Vite). 
 
-> Learning project only. Not a medical product.
+> **Disclaimer**: This is a demonstration and learning project only. It is **not** a substitute for professional medical advice.
 
-## Structure
+## Tech Stack
 
-```
+- **Frontend**: React, Vite, LiveKit Components
+- **Backend API**: FastAPI, SQLAlchemy, SQLite (Local) / PostgreSQL (Production)
+- **Voice Agent**: LiveKit Agents framework, OpenAI (LLM)
+- **Speech Providers**: Deepgram (English STT/TTS), Sarvam (Hindi STT/TTS), ElevenLabs (TTS)
+- **Authentication**: JWT Bearer Tokens
+
+## Project Structure
+
+```text
 voice-medicine-assistant/
 ├── README.md
 ├── backend/
 │   ├── main.py              # FastAPI entrypoint
-│   ├── config.py            # pydantic-settings
-│   ├── database.py          # SQLAlchemy engine + get_db
-│   ├── orm_models.py        # SQLAlchemy models
-│   ├── schemas.py           # Pydantic request/response models
-│   ├── seed_data.py         # Medicine reference data
+│   ├── database.py          # SQLAlchemy engine
+│   ├── orm_models.py        # SQLAlchemy models (User, Medicine, Conversation, Message)
+│   ├── schemas.py           # Pydantic schemas
 │   ├── requirements.txt
-│   ├── Procfile
-│   ├── .env.example
-│   ├── routers/             # voice, query, history, knowledge, dashboard
-│   ├── services/            # Business logic
-│   ├── agents/              # LiveKit voice agent
-│   ├── retriever/           # ChromaDB vector search
-│   ├── embeddings/
-│   ├── crawler/
-│   └── cache/
+│   ├── routers/             # API routes (voice, query, history, auth, dashboard)
+│   ├── services/            # Business logic & Proxy settings
+│   └── agents/              # LiveKit voice agent & tool logic
 └── frontend/
-    ├── index.html
-    ├── vite.config.js
     ├── package.json
-    ├── .env.example
+    ├── vite.config.js
     └── src/
-        ├── main.jsx
         ├── App.jsx
         ├── api/client.js
         ├── pages/
-        ├── components/
-        └── hooks/
+        └── components/
 ```
 
-## Quick Start
+## Quick Start (Local Development)
 
-### Backend
+### 1. Backend
 
 ```bash
 cd backend
 python -m venv venv
 venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS/Linux
 pip install -r requirements.txt
-cp .env.example .env           # add API keys
+cp .env.example .env           # Add your API keys!
 uvicorn main:app --reload
 ```
+API runs on `http://localhost:8000` — docs at `/docs`
 
-API: `http://localhost:8000` — docs at `/docs`
+### 2. LiveKit Voice Agent
 
-### LiveKit Agent
+The LiveKit agent runs as a separate background worker process.
 
 ```bash
 cd backend
-set VOICE_PROVIDER=deepgram
 python -m agents.agent dev
 ```
 
-### Frontend
+### 3. Frontend
 
 ```bash
 cd frontend
@@ -71,26 +68,24 @@ npm install
 cp .env.example .env
 npm run dev
 ```
+UI runs on `http://localhost:5173`
 
-UI: `http://localhost:5173`
+## Configuration & Environment Variables
 
-## API Routes
+Key variables for `backend/.env`:
+- `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`: Required for voice sessions.
+- `OPENAI_API_KEY`: For the conversational LLM.
+- `DEEPGRAM_API_KEY`, `SARVAM_API_KEY`: For Speech-To-Text / Text-To-Speech.
+- `DATABASE_URL`: Defaults to `sqlite:///./voicemed.db` locally.
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/voice/token` | LiveKit access token |
-| POST | `/query` | Text medicine query |
-| GET | `/history` | Past sessions |
-| GET | `/history/{id}` | Session detail |
-| POST | `/history/sessions/{id}/end` | End session |
-| GET | `/knowledge` | Cached knowledge |
-| GET | `/dashboard` | Stats |
+*Note on Proxies*: The project supports routing OpenAI and Voice requests through a MetricAI proxy for telemetry. You can disable this by commenting out `METRICAI_API_KEY` in your `.env`.
 
-## Voice Providers
+## Deployment
 
-| Provider | Language | Env var |
-|----------|----------|---------|
-| `deepgram` | English | `DEEPGRAM_API_KEY` |
-| `sarvam` | Hindi | `SARVAM_API_KEY` |
+The stack is designed to be easily deployed to modern cloud providers:
+- **Frontend**: Vercel (Auto-detects Vite)
+- **Backend API**: Render (Web Service)
+- **LiveKit Agent**: Render (Background Worker)
+- **Database**: Supabase (PostgreSQL)
 
-Set `VOICE_PROVIDER=deepgram` or `sarvam` in `backend/.env`.
+Set your `DATABASE_URL` to your Supabase Postgres connection string, deploy your web services, and ensure your `FRONTEND_URL` environment variable matches your Vercel domain for CORS.

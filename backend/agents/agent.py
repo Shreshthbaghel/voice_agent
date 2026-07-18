@@ -117,8 +117,8 @@ def _pause_listen_while_agent_busy(session: AgentSession) -> None:
             logger.warning("Failed to toggle mic input: %s", e)
 
 
-def _wire_metricai_voice_tracks(session: AgentSession, *, provider_name: str) -> None:
-    """Push STT/TTS usage to MetricAI dashboard (LiveKit plugins are not auto-instrumented)."""
+def _wire_metricai_voice_tracks(session: AgentSession, *, provider_name: str, conversation_id: str | None) -> None:
+    """Push STT/TTS usage to MetricAI dashboard and save messages to the database."""
     stt_model = "nova-3" if provider_name in ("deepgram", "elevenlabs") else "saaras:v3"
     tts_model = "elevenlabs:eleven_multilingual_v2" if provider_name == "elevenlabs" else ("aura-2-thalia-en" if provider_name == "deepgram" else "bulbul:v3")
 
@@ -150,10 +150,21 @@ def _wire_metricai_voice_tracks(session: AgentSession, *, provider_name: str) ->
         text = str(text or "").strip()
         if not text:
             return
+
         if role == "user":
             track_stt(provider=provider_name, model=stt_model, text=text)
         elif role == "assistant":
             track_tts(provider=provider_name, model=tts_model, text=text)
+
+        if conversation_id and role in ("user", "assistant"):
+            try:
+                from services.conversation_service import add_message
+                db = SessionLocal()
+                add_message(db, conversation_id, role, text)
+                db.close()
+            except Exception as e:
+                logger.error("Failed to save message to db: %s", e)
+
 
 
 async def entrypoint(ctx: JobContext) -> None:
@@ -205,7 +216,7 @@ async def entrypoint(ctx: JobContext) -> None:
         },
     )
     _pause_listen_while_agent_busy(session)
-    _wire_metricai_voice_tracks(session, provider_name=provider_name)
+    _wire_metricai_voice_tracks(session, provider_name=provider_name, conversation_id=conversation_id)
 
     agent = MedicineAgent(language=language, chat_ctx=chat_ctx)
     await session.start(agent=agent, room=ctx.room)
