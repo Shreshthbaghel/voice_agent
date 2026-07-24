@@ -10,10 +10,9 @@ COPY backend/requirements-agent.txt .
 
 RUN pip install --no-cache-dir -r requirements-agent.txt
 
+# Minimal - only what agent needs
 COPY backend/agents ./agents
 COPY backend/config.py ./
-COPY backend/models.py ./
-COPY backend/database.py ./
 
 EXPOSE 8081
 
