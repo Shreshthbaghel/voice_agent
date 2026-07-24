@@ -11,3 +11,7 @@ openai>=1.57.0
 httpx>=0.28.0
 aiohttp>=3.9.0
 metricai>=0.6.2
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.36
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
