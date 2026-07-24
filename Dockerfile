@@ -17,6 +17,7 @@ COPY backend/config.py ./
 COPY backend/database.py ./
 COPY backend/orm_models.py ./
 COPY backend/schemas.py ./
+COPY backend/seed_data.py ./
 
 EXPOSE 8081
 
